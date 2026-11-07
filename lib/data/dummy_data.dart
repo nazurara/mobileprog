@@ -7,6 +7,7 @@ const List<String> daftarKategori = [
   'Kue & Camilan',
   'Minuman',
   'Kerajinan',
+  'Hewan',
 ];
 
 const List<Product> daftarProduk = [
@@ -23,7 +24,7 @@ const List<Product> daftarProduk = [
     nama: 'Keripik Sanjai Original',
     harga: 30000,
     kategori: 'Keripik & Kerupuk',
-    gambar: 'assets/images/KeripikSanjai.jpg',
+    gambar: 'assets/images/KeripikSanjaiOriginal.jpg',
     deskripsi: 'Keripik singkong gurih asin tanpa bumbu pedas, cocok untuk semua usia. Berat bersih 250 gram.',
   ),
   Product(
@@ -79,6 +80,7 @@ const List<Product> daftarProduk = [
     nama: 'Songket Minang (Selendang)',
     harga: 250000,
     kategori: 'Kerajinan',
+    gambar: 'assets/images/SongketMinang.jpg',
     deskripsi: 'Selendang songket tenun tangan khas Sumatera Barat dengan motif tradisional. Cocok untuk hadiah dan acara adat.',
   ),
   Product(
@@ -86,6 +88,15 @@ const List<Product> daftarProduk = [
     nama: 'Gantungan Kunci Rumah Gadang',
     harga: 15000,
     kategori: 'Kerajinan',
+    gambar: 'assets/images/MainanKunci.png',
     deskripsi: 'Souvenir mini berbentuk Rumah Gadang dari bahan kayu yang dicat rapi. Ringan dan mudah dibawa pulang.',
+  ),
+  Product(
+    id: 11,
+    nama: 'Kerbau Khas Minang',
+    harga: 45000000,
+    kategori: 'Hewan',
+    gambar: 'assets/images/Kerbau.jpg',
+    deskripsi: 'Hewan Ternak yang bisa diajak main kalo bosan',
   ),
 ];
