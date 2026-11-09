@@ -7,6 +7,7 @@ const List<String> daftarKategori = [
   'Kue & Camilan',
   'Minuman',
   'Kerajinan',
+  'Hewan',
 ];
 
 const List<Product> daftarProduk = [
@@ -15,6 +16,7 @@ const List<Product> daftarProduk = [
     nama: 'Keripik Sanjai Balado',
     harga: 35000,
     kategori: 'Keripik & Kerupuk',
+    gambar: 'assets/images/KeripikSanjaiBalado.jpg',
     deskripsi: 'Keripik singkong tipis khas Bukittinggi dengan bumbu balado pedas manis. Renyah dan cocok jadi oleh-oleh. Berat bersih 250 gram.',
   ),
   Product(
@@ -22,6 +24,7 @@ const List<Product> daftarProduk = [
     nama: 'Keripik Sanjai Original',
     harga: 30000,
     kategori: 'Keripik & Kerupuk',
+    gambar: 'assets/images/KeripikSanjaiOriginal.jpg',
     deskripsi: 'Keripik singkong gurih asin tanpa bumbu pedas, cocok untuk semua usia. Berat bersih 250 gram.',
   ),
   Product(
@@ -29,6 +32,7 @@ const List<Product> daftarProduk = [
     nama: 'Kerupuk Jangek',
     harga: 25000,
     kategori: 'Keripik & Kerupuk',
+    gambar: 'assets/images/KeripikJangek.jpg',
     deskripsi: 'Kerupuk kulit sapi khas Minang yang gurih dan renyah, enak dimakan bersama sate atau soto. Berat bersih 200 gram.',
   ),
   Product(
@@ -36,6 +40,7 @@ const List<Product> daftarProduk = [
     nama: 'Rendang Daging Kemasan',
     harga: 85000,
     kategori: 'Lauk Kemasan',
+    gambar: 'assets/images/DagingRendang.jpg',
     deskripsi: 'Rendang daging sapi dimasak berjam-jam dengan santan dan rempah pilihan. Tahan lama dan praktis dibawa bepergian. Berat bersih 250 gram.',
   ),
   Product(
@@ -43,6 +48,7 @@ const List<Product> daftarProduk = [
     nama: 'Dendeng Batokok',
     harga: 70000,
     kategori: 'Lauk Kemasan',
+    gambar: 'assets/images/DendengBatokok.jpg',
     deskripsi: 'Dendeng sapi yang dipukul tipis lalu digoreng, disajikan dengan cabai hijau. Gurih, pedas, dan wangi. Berat bersih 200 gram.',
   ),
   Product(
@@ -50,6 +56,7 @@ const List<Product> daftarProduk = [
     nama: 'Bolu Kemojo',
     harga: 40000,
     kategori: 'Kue & Camilan',
+    gambar: 'assets/images/BoluKemojo.png',
     deskripsi: 'Kue bolu manis berbentuk khas dengan tekstur lembut, dibuat dari tepung, telur, dan gula. Isi 12 buah.',
   ),
   Product(
@@ -57,6 +64,7 @@ const List<Product> daftarProduk = [
     nama: 'Karak Kaliang',
     harga: 28000,
     kategori: 'Kue & Camilan',
+    gambar: 'assets/images/KarakKaliang.png',
     deskripsi: 'Camilan renyah berbentuk melingkar dengan rasa gurih dan sedikit pedas. Teman minum teh yang pas. Berat bersih 200 gram.',
   ),
   Product(
@@ -64,6 +72,7 @@ const List<Product> daftarProduk = [
     nama: 'Kopi Kawa Daun',
     harga: 45000,
     kategori: 'Minuman',
+    gambar: 'assets/images/KopiKawaDaun.jpg',
     deskripsi: 'Teh khas Minang dari seduhan daun kopi kering yang diberi rempah. Aroma hangat dan menyegarkan. Isi 100 gram.',
   ),
   Product(
@@ -71,6 +80,7 @@ const List<Product> daftarProduk = [
     nama: 'Songket Minang (Selendang)',
     harga: 250000,
     kategori: 'Kerajinan',
+    gambar: 'assets/images/SongketMinang.jpg',
     deskripsi: 'Selendang songket tenun tangan khas Sumatera Barat dengan motif tradisional. Cocok untuk hadiah dan acara adat.',
   ),
   Product(
@@ -78,6 +88,15 @@ const List<Product> daftarProduk = [
     nama: 'Gantungan Kunci Rumah Gadang',
     harga: 15000,
     kategori: 'Kerajinan',
+    gambar: 'assets/images/MainanKunci.png',
     deskripsi: 'Souvenir mini berbentuk Rumah Gadang dari bahan kayu yang dicat rapi. Ringan dan mudah dibawa pulang.',
+  ),
+  Product(
+    id: 11,
+    nama: 'Kerbau Khas Minang',
+    harga: 45000000,
+    kategori: 'Hewan',
+    gambar: 'assets/images/Kerbau.jpg',
+    deskripsi: 'Hewan Ternak yang bisa diajak main kalo bosan',
   ),
 ];
