@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../models/product.dart';
+import 'keranjang_page.dart';
 
 class DetailPage extends StatelessWidget {
   final Product produk;
 
   const DetailPage({super.key, required this.produk});
-
-  void _tambahKeKeranjang(BuildContext context) {
-    // TODO (issue #2): sambungkan ke logika keranjang milik temanmu.
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('${produk.nama} ditambahkan ke keranjang'),
-          duration: const Duration(milliseconds: 1500),
-        ),
-      );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +16,7 @@ class DetailPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Detail Produk'),
         backgroundColor: tema.colorScheme.inversePrimary,
+        actions: const [TombolKeranjang(), SizedBox(width: 8)],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -78,7 +68,7 @@ class DetailPage extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.add_shopping_cart),
                   label: const Text('Tambah ke keranjang'),
-                  onPressed: () => _tambahKeKeranjang(context),
+                  onPressed: () => tambahKeKeranjang(context, produk),
                 ),
               ),
             ),

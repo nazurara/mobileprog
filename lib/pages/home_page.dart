@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 import '../models/product.dart';
 import 'detail_page.dart';
+import 'keranjang_page.dart';
 
 /// ID produk yang diberi label "Terlaris".
 const Set<int> _idTerlaris = {1, 4, 9};
@@ -71,6 +72,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('LapakKu'),
         backgroundColor: tema.colorScheme.inversePrimary,
+        actions: const [TombolKeranjang(), SizedBox(width: 8)],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -215,18 +217,6 @@ class _KartuProduk extends StatelessWidget {
     );
   }
 
-  void _tambahKeKeranjang(BuildContext context) {
-    // TODO (issue #2): sambungkan ke logika keranjang milik temanmu.
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('${produk.nama} ditambahkan ke keranjang'),
-          duration: const Duration(milliseconds: 1500),
-        ),
-      );
-  }
-
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
@@ -332,7 +322,7 @@ class _KartuProduk extends StatelessWidget {
                 style: FilledButton.styleFrom(shape: const StadiumBorder()),
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
                 label: const Text('Tambah ke keranjang'),
-                onPressed: () => _tambahKeKeranjang(context),
+                onPressed: () => tambahKeKeranjang(context, produk),
               ),
               const SizedBox(height: 8),
 
