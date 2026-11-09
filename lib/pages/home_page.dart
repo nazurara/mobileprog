@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: daftarKategori.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 final kategori = daftarKategori[i];
                 return ChoiceChip(
@@ -160,7 +160,7 @@ class GambarProduk extends StatelessWidget {
         produk.gambar,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _placeholder(warna),
+        errorBuilder: (_, _, _) => _placeholder(warna),
       );
     }
     return _placeholder(warna);
