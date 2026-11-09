@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/product.dart';
 import 'home_page.dart' show GambarProduk;
+import 'keranjang_page.dart';
 
 class DetailPage extends StatelessWidget {
   final Product produk;
@@ -16,6 +17,7 @@ class DetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(produk.nama),
         backgroundColor: tema.colorScheme.inversePrimary,
+        actions: const [TombolKeranjang(), SizedBox(width: 4)],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -63,12 +65,7 @@ class DetailPage extends StatelessWidget {
           child: FilledButton.icon(
             icon: const Icon(Icons.add_shopping_cart),
             label: const Text('Tambah ke keranjang'),
-            onPressed: () {
-              // TODO (issue #2): sambungkan ke logika keranjang milik temanmu.
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${produk.nama} ditambahkan')),
-              );
-            },
+            onPressed: () => tambahKeKeranjang(context, produk),
           ),
         ),
       ),
