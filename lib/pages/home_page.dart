@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 import '../models/product.dart';
 import 'detail_page.dart';
+import 'keranjang_page.dart';
 
 /// ID produk yang masuk bagian "Terlaris" (bisa digeser ke samping).
 /// Ubah angka di sini kalau ingin mengganti produk terlaris.
@@ -90,6 +91,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('LapakKu'),
         backgroundColor: tema.colorScheme.inversePrimary,
+        actions: const [
+          // Ikon keranjang + badge jumlah barang (dari keranjang_page.dart)
+          TombolKeranjang(),
+          SizedBox(width: 4),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -321,16 +327,10 @@ class _KartuProduk extends StatelessWidget {
     );
   }
 
+  /// Memasukkan produk ke keranjang (fungsi dari keranjang_page.dart),
+  /// lengkap dengan notifikasi dan tombol LIHAT.
   void _tambahKeKeranjang(BuildContext context) {
-    // TODO (issue #2): sambungkan ke logika keranjang milik temanmu.
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('${produk.nama} ditambahkan ke keranjang'),
-          duration: const Duration(milliseconds: 1500),
-        ),
-      );
+    tambahKeKeranjang(context, produk);
   }
 
   @override
