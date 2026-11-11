@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../models/product.dart';
 import 'varian_produk.dart';
+import 'lacak_pesanan_page.dart';
 
 // =====================================================================
 //  KERANJANG + CHECKOUT + PESANAN (gaya Shopee) - SATU file.
@@ -2639,6 +2640,22 @@ class _KartuPesanan extends StatelessWidget {
                   child: const Text('Bayar Sekarang'),
                 ),
               ],
+            ),
+          ],
+          if (p.status == StatusPesanan.dikemas) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                label: const Text('Lacak Pesanan'),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LacakPesananPage(pesanan: p),
+                  ),
+                ),
+              ),
             ),
           ],
         ],
