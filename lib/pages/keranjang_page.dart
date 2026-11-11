@@ -198,7 +198,7 @@ class KeranjangPage extends StatelessWidget {
               Icon(Icons.storefront, size: 20, color: tema.colorScheme.primary),
               const SizedBox(width: 8),
               const Text(
-                'Toko Oleh-Oleh Sumbar',
+                'Toko Oleh-Oleh Minang',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -478,7 +478,7 @@ class _KeranjangKosong extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Yuk pilih oleh-oleh khas Sumbar!',
+            'Yuk pilih oleh-oleh khas Minang!',
             style: TextStyle(color: Colors.black54),
           ),
           const SizedBox(height: 16),
@@ -693,7 +693,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               Icon(Icons.storefront, size: 20, color: tema.colorScheme.primary),
               const SizedBox(width: 8),
               const Text(
-                'Toko Oleh-Oleh Sumbar',
+                'Toko Oleh-Oleh Minang',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -1168,7 +1168,7 @@ class PesananBerhasilPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Terima kasih sudah belanja oleh-oleh khas Sumbar',
+                      'Terima kasih sudah belanja oleh-oleh khas Minang',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.black54),
                     ),
