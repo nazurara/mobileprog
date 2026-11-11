@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 import '../models/product.dart';
 import 'detail_page.dart';
-import 'keranjang_page.dart';
 
-/// ID produk yang diberi label "Terlaris".
+/// ID produk yang masuk bagian "Terlaris" (bisa digeser ke samping).
+/// Ubah angka di sini kalau ingin mengganti produk terlaris.
 const Set<int> _idTerlaris = {1, 4, 9};
 
 class HomePage extends StatefulWidget {
@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   String _kataKunci = '';
   String _kategoriDipilih = 'Semua';
   double _progress = 0;
+  bool _bisaGeser = false;
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  /// Menghitung seberapa jauh daftar produk sudah digeser (untuk bar di bawah).
+  /// Menghitung seberapa jauh daftar terlaris sudah digeser (untuk bar).
   void _updateProgress() {
     if (!_scroll.hasClients) return;
     final pos = _scroll.position;
@@ -44,10 +45,18 @@ class _HomePageState extends State<HomePage> {
         ? 1.0
         : (pos.pixels + pos.viewportDimension) / total;
     final bersih = nilai.clamp(0.0, 1.0);
-    if ((bersih - _progress).abs() > 0.001) {
-      setState(() => _progress = bersih);
+    final bisa = pos.maxScrollExtent > 0;
+    if ((bersih - _progress).abs() > 0.001 || bisa != _bisaGeser) {
+      setState(() {
+        _progress = bersih;
+        _bisaGeser = bisa;
+      });
     }
   }
+
+  /// Produk terlaris, ikut tersaring oleh pencarian dan kategori di atasnya.
+  List<Product> get _produkTerlaris =>
+      _produkTampil.where((p) => _idTerlaris.contains(p.id)).toList();
 
   List<Product> get _produkTampil {
     return daftarProduk.where((p) {
@@ -60,8 +69,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final terlaris = _produkTerlaris;
     final produk = _produkTampil;
     final tema = Theme.of(context);
+
+    // Supaya kartu terlaris berada di tengah kalau semuanya muat di layar.
+    final lebarLayar = MediaQuery.of(context).size.width;
+    final jumlah = terlaris.length;
+    final lebarIsi = jumlah == 0 ? 0.0 : jumlah * 260.0 + (jumlah - 1) * 16.0;
+    final sisiKartu = ((lebarLayar - lebarIsi) / 2)
+        .clamp(24.0, double.infinity)
+        .toDouble();
 
     // Hitung ulang bar geser setelah tampilan selesai digambar.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,14 +90,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('LapakKu'),
         backgroundColor: tema.colorScheme.inversePrimary,
-        actions: const [TombolKeranjang(), SizedBox(width: 8)],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 28),
 
-            // Judul
+            // Judul utama
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text.rich(
@@ -102,15 +119,14 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Pilih oleh-oleh terbaik dari Ranah Minang '
-                '(geser ke samping untuk melihat produk lainnya)',
+                'Pilih oleh-oleh terbaik dari Ranah Minang',
                 textAlign: TextAlign.center,
                 style: tema.textTheme.bodyMedium?.copyWith(
                   color: tema.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 28),
 
             // Kolom pencarian
             Padding(
@@ -152,15 +168,18 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 16),
 
-            // Daftar produk (geser ke samping)
-            if (produk.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 64),
-                child: Text('Produk tidak ditemukan'),
-              )
-            else ...[
+            // ===== Bagian 1: Produk Terlaris (geser ke samping) =====
+            if (terlaris.isNotEmpty) ...[
+              _JudulBagian(
+                ikon: Icons.star,
+                teks: 'Produk Terlaris',
+                keterangan: _bisaGeser
+                    ? 'Geser ke samping untuk melihat lainnya'
+                    : null,
+              ),
+              const SizedBox(height: 8),
               SizedBox(
-                height: 450,
+                height: 470,
                 child: ScrollConfiguration(
                   // Supaya bisa digeser dengan mouse di Chrome.
                   behavior: ScrollConfiguration.of(context).copyWith(
@@ -173,30 +192,67 @@ class _HomePageState extends State<HomePage> {
                   child: ListView.separated(
                     controller: _scroll,
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: produk.length,
+                    padding: EdgeInsets.symmetric(horizontal: sisiKartu),
+                    itemCount: terlaris.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(width: 16),
+                    itemBuilder: (context, i) =>
+                        _KartuProduk(produk: terlaris[i], lebar: 260),
+                  ),
+                ),
+              ),
+              // Bar penanda posisi hanya muncul kalau memang perlu digeser.
+              if (_bisaGeser) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: _progress,
+                      minHeight: 8,
+                      backgroundColor: tema.colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 36),
+            ],
+
+            // ===== Bagian 2: Semua Produk (ke bawah) =====
+            const _JudulBagian(
+              ikon: Icons.storefront_outlined,
+              teks: 'Semua Produk',
+            ),
+            const SizedBox(height: 14),
+
+            // Daftar semua produk (tersusun ke bawah)
+            if (produk.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 64),
+                child: Text('Produk tidak ditemukan'),
+              )
+            else
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 300,
+                          mainAxisExtent: 470,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 8,
+                        ),
+                    itemCount: produk.length,
                     itemBuilder: (context, i) =>
                         _KartuProduk(produk: produk[i]),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-
-              // Bar penanda posisi geser
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: _progress,
-                    minHeight: 8,
-                    backgroundColor: tema.colorScheme.surfaceContainerHighest,
-                  ),
-                ),
-              ),
-            ],
             const SizedBox(height: 32),
           ],
         ),
@@ -205,10 +261,58 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+/// Judul bagian (misalnya "Produk Terlaris") dengan ikon.
+class _JudulBagian extends StatelessWidget {
+  final IconData ikon;
+  final String teks;
+  final String? keterangan;
+
+  const _JudulBagian({required this.ikon, required this.teks, this.keterangan});
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(ikon, color: tema.colorScheme.secondary),
+              const SizedBox(width: 8),
+              Text(
+                teks,
+                style: tema.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          if (keterangan != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              keterangan!,
+              textAlign: TextAlign.center,
+              style: tema.textTheme.bodySmall?.copyWith(
+                color: tema.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _KartuProduk extends StatelessWidget {
   final Product produk;
 
-  const _KartuProduk({required this.produk});
+  /// Lebar kartu. Kosong = mengikuti ukuran kotak grid.
+  final double? lebar;
+
+  const _KartuProduk({required this.produk, this.lebar});
 
   void _bukaDetail(BuildContext context) {
     Navigator.push(
@@ -217,12 +321,24 @@ class _KartuProduk extends StatelessWidget {
     );
   }
 
+  void _tambahKeKeranjang(BuildContext context) {
+    // TODO (issue #2): sambungkan ke logika keranjang milik temanmu.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${produk.nama} ditambahkan ke keranjang'),
+          duration: const Duration(milliseconds: 1500),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
 
     return SizedBox(
-      width: 260,
+      width: lebar,
       child: Card(
         elevation: 2,
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -322,7 +438,7 @@ class _KartuProduk extends StatelessWidget {
                 style: FilledButton.styleFrom(shape: const StadiumBorder()),
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
                 label: const Text('Tambah ke keranjang'),
-                onPressed: () => tambahKeKeranjang(context, produk),
+                onPressed: () => _tambahKeKeranjang(context),
               ),
               const SizedBox(height: 8),
 
