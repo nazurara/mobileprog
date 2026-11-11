@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/product.dart';
+import 'varian_produk.dart';
 
 // =====================================================================
 //  KERANJANG + CHECKOUT + PESANAN (gaya Shopee) - SATU file.
 //  Isi file:
 //   1. Format & helper     -> formatRupiah, tanggal
-//   2. CartModel           -> data keranjang
+//   2. CartModel           -> data keranjang (produk + varian ukuran)
 //   3. Alamat              -> data alamat + daftar provinsi
 //   4. Voucher             -> data voucher
 //   5. Pesanan             -> data pesanan (riwayat)
@@ -58,19 +59,33 @@ String _formatTanggal(DateTime d) {
 
 class CartItem {
   final Product produk;
+
+  /// Ukuran yang dipilih (beserta harganya).
+  final Varian varian;
   int jumlah;
   bool dipilih;
 
-  CartItem({required this.produk, this.jumlah = 1, this.dipilih = true});
+  CartItem({
+    required this.produk,
+    required this.varian,
+    this.jumlah = 1,
+    this.dipilih = true,
+  });
 
-  int get subtotal => produk.harga * jumlah;
+  /// Produk yang sama dengan ukuran berbeda dianggap barang terpisah.
+  String get kunci => '${produk.id}|${varian.label}';
+
+  /// Harga satuan sesuai ukuran yang dipilih.
+  int get harga => varian.harga;
+
+  int get subtotal => harga * jumlah;
 }
 
 class CartModel extends ChangeNotifier {
   CartModel._();
   static final CartModel instance = CartModel._();
 
-  /// Batas pembelian per produk.
+  /// Batas pembelian per produk (per ukuran).
   static const int maksPerProduk = 20;
 
   final List<CartItem> _items = [];
@@ -87,26 +102,35 @@ class CartModel extends ChangeNotifier {
   int get totalDipilih => itemDipilih.fold(0, (s, i) => s + i.subtotal);
   bool get semuaDipilih => _items.isNotEmpty && _items.every((i) => i.dipilih);
 
-  int _cari(Product p) => _items.indexWhere((i) => i.produk.id == p.id);
+  int _cari(String kunci) => _items.indexWhere((i) => i.kunci == kunci);
 
-  /// Posisi produk di keranjang (-1 kalau tidak ada). Untuk fitur batal hapus.
-  int indeksDari(Product p) => _cari(p);
+  /// Posisi barang di keranjang (-1 kalau tidak ada). Untuk fitur batal hapus.
+  int indeksDari(CartItem item) => _cari(item.kunci);
 
   /// Mengembalikan false kalau sudah mencapai batas pembelian.
-  bool tambah(Product p) {
-    final idx = _cari(p);
+  bool tambah(Product p, Varian v, {int jumlah = 1}) {
+    final kunci = '${p.id}|${v.label}';
+    final idx = _cari(kunci);
     if (idx == -1) {
-      _items.insert(0, CartItem(produk: p));
+      _items.insert(
+        0,
+        CartItem(
+          produk: p,
+          varian: v,
+          jumlah: jumlah > maksPerProduk ? maksPerProduk : jumlah,
+        ),
+      );
     } else {
       if (_items[idx].jumlah >= maksPerProduk) return false;
-      _items[idx].jumlah++;
+      final baru = _items[idx].jumlah + jumlah;
+      _items[idx].jumlah = baru > maksPerProduk ? maksPerProduk : baru;
     }
     notifyListeners();
     return true;
   }
 
-  void kurang(Product p) {
-    final idx = _cari(p);
+  void kurang(CartItem item) {
+    final idx = _cari(item.kunci);
     if (idx == -1) return;
     if (_items[idx].jumlah > 1) {
       _items[idx].jumlah--;
@@ -114,8 +138,8 @@ class CartModel extends ChangeNotifier {
     }
   }
 
-  void toggle(Product p) {
-    final idx = _cari(p);
+  void toggle(CartItem item) {
+    final idx = _cari(item.kunci);
     if (idx == -1) return;
     _items[idx].dipilih = !_items[idx].dipilih;
     notifyListeners();
@@ -128,14 +152,14 @@ class CartModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void hapus(Product p) {
-    _items.removeWhere((i) => i.produk.id == p.id);
+  void hapus(CartItem item) {
+    _items.removeWhere((i) => i.kunci == item.kunci);
     notifyListeners();
   }
 
   /// Mengembalikan barang yang tadi dihapus (tombol BATAL).
   void sisipkan(int index, CartItem item) {
-    if (_cari(item.produk) != -1) return;
+    if (_cari(item.kunci) != -1) return;
     final pos = index > _items.length ? _items.length : index;
     _items.insert(pos, item);
     notifyListeners();
@@ -383,35 +407,43 @@ class PesananModel extends ChangeNotifier {
 //  TOMBOL-TOMBOL YANG DIPAKAI HALAMAN LAIN
 // ---------------------------------------------------------------------
 
-/// Tambah produk ke keranjang + notifikasi dengan tombol LIHAT.
-/// Notifikasi hilang sendiri setelah 3 detik.
-void tambahKeKeranjang(BuildContext context, Product produk) {
-  final berhasil = CartModel.instance.tambah(produk);
+/// Buka form pilihan ukuran/jumlah. Setelah dipilih, produk masuk keranjang
+/// + notifikasi dengan tombol LIHAT (hilang sendiri setelah 3 detik).
+Future<void> tambahKeKeranjang(BuildContext context, Product produk) async {
   final messenger = ScaffoldMessenger.of(context);
+  final navigator = Navigator.of(context);
+
+  final pilihan = await tampilkanFormVarian(
+    context,
+    produk,
+    maks: CartModel.maksPerProduk,
+  );
+  if (pilihan == null) return; // form ditutup tanpa memilih
+
+  final berhasil = CartModel.instance.tambah(
+    produk,
+    pilihan.varian,
+    jumlah: pilihan.jumlah,
+  );
   messenger.hideCurrentSnackBar();
 
   if (!berhasil) {
     messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          'Maksimal ${CartModel.maksPerProduk} per produk',
-        ),
-      ),
+      SnackBar(content: Text('Maksimal ${CartModel.maksPerProduk} per produk')),
     );
     return;
   }
 
   messenger.showSnackBar(
     SnackBar(
-      content: Text('${produk.nama} masuk keranjang'),
+      content: Text('${produk.nama} (${pilihan.varian.label}) masuk keranjang'),
       duration: const Duration(seconds: 3),
       // Tanpa ini, notifikasi yang punya tombol tidak hilang sendiri.
       persist: false,
       action: SnackBarAction(
         label: 'LIHAT',
         textColor: const Color(0xFFFFD54F),
-        onPressed: () => Navigator.push(
-          context,
+        onPressed: () => navigator.push(
           MaterialPageRoute(builder: (_) => const KeranjangPage()),
         ),
       ),
@@ -480,14 +512,16 @@ Future<void> _konfirmasiHapus(
 /// Hapus satu barang dari keranjang, lalu tawarkan tombol BATAL.
 void _hapusDariKeranjang(BuildContext context, CartModel cart, CartItem item) {
   final messenger = ScaffoldMessenger.of(context);
-  final posisi = cart.indeksDari(item.produk);
-  cart.hapus(item.produk);
+  final posisi = cart.indeksDari(item);
+  cart.hapus(item);
 
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text('${item.produk.nama} dihapus dari keranjang'),
+        content: Text(
+          '${item.produk.nama} (${item.varian.label}) dihapus dari keranjang',
+        ),
         duration: const Duration(seconds: 4),
         persist: false,
         action: SnackBarAction(
@@ -624,7 +658,7 @@ class _BarisItem extends StatelessWidget {
     final tema = Theme.of(context);
 
     return Dismissible(
-      key: ValueKey(p.id),
+      key: ValueKey(item.kunci),
       direction: DismissDirection.endToStart,
       onDismissed: (_) => _hapusDariKeranjang(context, cart, item),
       background: Container(
@@ -646,7 +680,7 @@ class _BarisItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Checkbox(value: item.dipilih, onChanged: (_) => cart.toggle(p)),
+            Checkbox(value: item.dipilih, onChanged: (_) => cart.toggle(item)),
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: SizedBox(
@@ -676,8 +710,11 @@ class _BarisItem extends StatelessWidget {
                         onTap: () => _konfirmasiHapus(
                           context,
                           judul: 'Hapus produk?',
-                          isi: 'Hapus ${p.nama} dari keranjang?',
-                          onHapus: () => _hapusDariKeranjang(context, cart, item),
+                          isi:
+                              'Hapus ${p.nama} (${item.varian.label}) '
+                              'dari keranjang?',
+                          onHapus: () =>
+                              _hapusDariKeranjang(context, cart, item),
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(4),
@@ -691,13 +728,26 @@ class _BarisItem extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    p.kategori,
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  // Ukuran yang dipilih
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: tema.colorScheme.primaryContainer.withValues(
+                        alpha: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      item.varian.label,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    p.hargaRupiah,
+                    formatRupiah(item.harga),
                     style: TextStyle(
                       color: tema.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -727,20 +777,20 @@ class _Stepper extends StatelessWidget {
 
   void _kurang(BuildContext context) {
     if (item.jumlah > 1) {
-      cart.kurang(item.produk);
+      cart.kurang(item);
       return;
     }
     // Jumlah tinggal 1: tanya dulu sebelum dihapus.
     _konfirmasiHapus(
       context,
       judul: 'Hapus produk?',
-      isi: 'Hapus ${item.produk.nama} dari keranjang?',
+      isi: 'Hapus ${item.produk.nama} (${item.varian.label}) dari keranjang?',
       onHapus: () => _hapusDariKeranjang(context, cart, item),
     );
   }
 
   void _tambah(BuildContext context) {
-    if (!cart.tambah(item.produk)) {
+    if (!cart.tambah(item.produk, item.varian)) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
@@ -976,7 +1026,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
     super.initState();
     // Salinan barang yang dicentang di keranjang.
     _barang = CartModel.instance.itemDipilih
-        .map((i) => CartItem(produk: i.produk, jumlah: i.jumlah))
+        .map(
+          (i) => CartItem(produk: i.produk, varian: i.varian, jumlah: i.jumlah),
+        )
         .toList();
   }
 
@@ -1084,7 +1136,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final bayar = _daftarBayar[_bayar];
     final transfer = bayar.nama == 'Transfer Bank';
     final cod = bayar.nama.startsWith('COD');
-    final metode = transfer ? 'Transfer Bank ${_daftarBank[_bank]}' : bayar.nama;
+    final metode = transfer
+        ? 'Transfer Bank ${_daftarBank[_bank]}'
+        : bayar.nama;
     final instruksi = cod
         ? ''
         : transfer
@@ -1272,12 +1326,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        Text(
+                          'Ukuran: ${b.varian.label}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
                         const SizedBox(height: 6),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              b.produk.hargaRupiah,
+                              formatRupiah(b.harga),
                               style: TextStyle(
                                 color: tema.colorScheme.primary,
                                 fontWeight: FontWeight.w600,
@@ -1369,7 +1430,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       : '${v.kode}  -${formatRupiah(_diskon)}',
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: v == null ? Colors.black54 : tema.colorScheme.primary,
+                    color: v == null
+                        ? Colors.black54
+                        : tema.colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1966,7 +2029,9 @@ class _AlamatFormPageState extends State<AlamatFormPage> {
                           controller: _telp,
                           keyboardType: TextInputType.phone,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9+]'),
+                            ),
                             LengthLimitingTextInputFormatter(15),
                           ],
                           validator: _cekTelp,
@@ -2432,9 +2497,7 @@ class PesananSayaPage extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 640),
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 24),
-                children: [
-                  for (final p in daftar) _KartuPesanan(pesanan: p),
-                ],
+                children: [for (final p in daftar) _KartuPesanan(pesanan: p)],
               ),
             ),
           );
@@ -2506,12 +2569,12 @@ class _KartuPesanan extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          b.produk.nama,
+                          '${b.produk.nama} (${b.varian.label})',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          '${b.produk.hargaRupiah}  x${b.jumlah}',
+                          '${formatRupiah(b.harga)}  x${b.jumlah}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.black54,
