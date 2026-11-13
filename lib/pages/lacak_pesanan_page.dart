@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'keranjang_page.dart';
+import '../widgets/hover_besar.dart';
 
 // =====================================================================
 //  TRACKING PESANAN OTOMATIS (file terpisah dari keranjang_page.dart)
@@ -389,27 +390,34 @@ class _LacakPesananPageState extends State<LacakPesananPage>
         child: Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.maybePop(context),
-                icon: const Icon(Icons.receipt_long_outlined),
-                label: const Text('Riwayat'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  shape: const StadiumBorder(),
-                  textStyle: gayaTeks,
+              child: HoverBesar(
+                skala: 1.04,
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.maybePop(context),
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  label: const Text('Riwayat'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: const StadiumBorder(),
+                    textStyle: gayaTeks,
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: FilledButton.icon(
-                onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
-                icon: const Icon(Icons.storefront_outlined),
-                label: const Text('Beranda'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  shape: const StadiumBorder(),
-                  textStyle: gayaTeks,
+              child: HoverBesar(
+                skala: 1.04,
+                child: FilledButton.icon(
+                  onPressed: () =>
+                      Navigator.popUntil(context, (r) => r.isFirst),
+                  icon: const Icon(Icons.storefront_outlined),
+                  label: const Text('Beranda'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: const StadiumBorder(),
+                    textStyle: gayaTeks,
+                  ),
                 ),
               ),
             ),

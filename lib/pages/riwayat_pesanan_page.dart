@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/hover_besar.dart';
 import 'keranjang_page.dart';
 import 'lacak_pesanan_page.dart';
 
@@ -178,7 +179,11 @@ class _PesananSayaPageState extends State<PesananSayaPage> {
       padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 24),
       child: Column(
         children: [
-          const Icon(Icons.receipt_long_outlined, size: 72, color: Colors.black26),
+          const Icon(
+            Icons.receipt_long_outlined,
+            size: 72,
+            color: Colors.black26,
+          ),
           const SizedBox(height: 12),
           Text(
             belumAdaPesanan
@@ -213,16 +218,19 @@ class _PesananSayaPageState extends State<PesananSayaPage> {
             ),
           ],
         ),
-        child: FilledButton.icon(
-          onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
-          icon: const Icon(Icons.storefront_outlined),
-          label: const Text('Kembali ke Beranda'),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-            shape: const StadiumBorder(),
-            textStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
+        child: HoverBesar(
+          skala: 1.03,
+          child: FilledButton.icon(
+            onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
+            icon: const Icon(Icons.storefront_outlined),
+            label: const Text('Kembali ke Beranda'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+              shape: const StadiumBorder(),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -489,55 +497,79 @@ class _KartuRiwayat extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      OutlinedButton(
-                        onPressed: () => _konfirmasiBatal(context),
-                        style: OutlinedButton.styleFrom(
-                          shape: const StadiumBorder(),
+                      HoverBesar(
+                        child: OutlinedButton(
+                          onPressed: () => _konfirmasiBatal(context),
+                          style: OutlinedButton.styleFrom(
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Batalkan'),
                         ),
-                        child: const Text('Batalkan'),
                       ),
                       const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: () {
-                          PesananModel.instance.ubahStatus(
-                            p,
-                            StatusPesanan.dikemas,
-                          );
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Pembayaran diterima (simulasi)',
-                                ),
-                              ),
+                      HoverBesar(
+                        child: FilledButton(
+                          onPressed: () {
+                            PesananModel.instance.ubahStatus(
+                              p,
+                              StatusPesanan.dikemas,
                             );
-                        },
-                        style: FilledButton.styleFrom(
-                          shape: const StadiumBorder(),
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Pembayaran diterima (simulasi)',
+                                  ),
+                                ),
+                              );
+                          },
+                          style: FilledButton.styleFrom(
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Bayar Sekarang'),
                         ),
-                        child: const Text('Bayar Sekarang'),
                       ),
                     ],
                   ),
                 ],
                 if (dikemas) ...[
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FilledButton.icon(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => LacakPesananPage(pesanan: p),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // Masih bisa dibatalkan selama belum dikirim
+                      if (TrackingModel.instance.tahap(p) == 0) ...[
+                        HoverBesar(
+                          child: OutlinedButton(
+                            onPressed: () => _konfirmasiBatal(context),
+                            style: OutlinedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                            ),
+                            child: const Text('Batalkan'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      HoverBesar(
+                        child: FilledButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LacakPesananPage(pesanan: p),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.local_shipping_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('Lacak Pesanan'),
+                          style: FilledButton.styleFrom(
+                            shape: const StadiumBorder(),
+                          ),
                         ),
                       ),
-                      icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                      label: const Text('Lacak Pesanan'),
-                      style: FilledButton.styleFrom(
-                        shape: const StadiumBorder(),
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ],

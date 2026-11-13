@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/product.dart';
+import '../widgets/hover_besar.dart';
+
 import 'keranjang_page.dart';
 
 class DetailPage extends StatelessWidget {
@@ -61,14 +63,17 @@ class DetailPage extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 912),
               child: SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    minimumSize: const Size(0, 52),
+                child: HoverBesar(
+                  skala: 1.03,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      minimumSize: const Size(0, 52),
+                    ),
+                    icon: const Icon(Icons.add_shopping_cart),
+                    label: const Text('Tambah ke keranjang'),
+                    onPressed: () => tambahKeKeranjang(context, produk),
                   ),
-                  icon: const Icon(Icons.add_shopping_cart),
-                  label: const Text('Tambah ke keranjang'),
-                  onPressed: () => tambahKeKeranjang(context, produk),
                 ),
               ),
             ),

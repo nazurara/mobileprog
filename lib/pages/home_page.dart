@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../data/dummy_data.dart';
 import '../models/product.dart';
+import '../widgets/hover_besar.dart';
+
 import 'detail_page.dart';
 import 'keranjang_page.dart';
 import 'riwayat_pesanan_page.dart';
@@ -140,22 +142,26 @@ class _HomePageState extends State<HomePage> {
               listenable: PesananModel.instance,
               builder: (context, _) {
                 final jumlah = PesananModel.instance.daftar.length;
-                return OutlinedButton.icon(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const PesananSayaPage()),
-                  ),
-                  icon: Badge(
-                    isLabelVisible: jumlah > 0,
-                    label: Text('$jumlah'),
-                    child: const Icon(Icons.receipt_long_outlined),
-                  ),
-                  label: const Text('Riwayat Pesanan'),
-                  style: OutlinedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                return HoverBesar(
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PesananSayaPage(),
+                      ),
+                    ),
+                    icon: Badge(
+                      isLabelVisible: jumlah > 0,
+                      label: Text('$jumlah'),
+                      child: const Icon(Icons.receipt_long_outlined),
+                    ),
+                    label: const Text('Riwayat Pesanan'),
+                    style: OutlinedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 );
@@ -463,20 +469,24 @@ class _KartuProduk extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Tombol keranjang
-              FilledButton.icon(
-                style: FilledButton.styleFrom(shape: const StadiumBorder()),
-                icon: const Icon(Icons.add_shopping_cart, size: 18),
-                label: const Text('Tambah ke keranjang'),
-                onPressed: () => _tambahKeKeranjang(context),
+              HoverBesar(
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(shape: const StadiumBorder()),
+                  icon: const Icon(Icons.add_shopping_cart, size: 18),
+                  label: const Text('Tambah ke keranjang'),
+                  onPressed: () => _tambahKeKeranjang(context),
+                ),
               ),
               const SizedBox(height: 8),
 
               // Tombol detail
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
-                icon: const Icon(Icons.info_outline, size: 18),
-                label: const Text('Detail Produk'),
-                onPressed: () => _bukaDetail(context),
+              HoverBesar(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
+                  icon: const Icon(Icons.info_outline, size: 18),
+                  label: const Text('Detail Produk'),
+                  onPressed: () => _bukaDetail(context),
+                ),
               ),
             ],
           ),
