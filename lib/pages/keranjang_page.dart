@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../models/product.dart';
 import 'varian_produk.dart';
 import 'lacak_pesanan_page.dart';
+import 'riwayat_pesanan_page.dart';
 
 // =====================================================================
 //  KERANJANG + CHECKOUT + PESANAN (gaya Shopee) - SATU file.
@@ -2450,8 +2451,8 @@ class _BarisInfo extends StatelessWidget {
 //  HALAMAN PESANAN SAYA (riwayat)
 // ---------------------------------------------------------------------
 
-class PesananSayaPage extends StatelessWidget {
-  const PesananSayaPage({super.key});
+class PesananSayaPageLama extends StatelessWidget {
+  const PesananSayaPageLama({super.key});
 
   @override
   Widget build(BuildContext context) {

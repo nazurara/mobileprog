@@ -13,10 +13,10 @@ import 'keranjang_page.dart';
 // =====================================================================
 
 /// Lama dari "Dikemas" sampai "Dikirim".
-const Duration _jedaKemas = Duration(seconds: 6);
+const Duration _jedaKemas = Duration(minutes: 2);
 
 /// Lama dari "Dikirim" sampai "Tiba".
-const Duration _jedaKirim = Duration(seconds: 10);
+const Duration _jedaKirim = Duration(minutes: 5);
 
 const Map<String, String> _estimasi = {
   'Hemat': '5-7 hari',
@@ -26,8 +26,18 @@ const Map<String, String> _estimasi = {
 
 String _tgl(DateTime d) {
   const bulan = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mei',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des',
   ];
   String dua(int n) => n.toString().padLeft(2, '0');
   return '${d.day} ${bulan[d.month - 1]} ${d.year}, ${dua(d.hour)}:${dua(d.minute)}';
@@ -116,7 +126,7 @@ class _LacakPesananPageState extends State<LacakPesananPage>
       backgroundColor: const Color(0xFFE9E2DC),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
+          constraints: const BoxConstraints(maxWidth: 600),
           child: Material(
             color: const Color(0xFFF7F2EE),
             child: ListenableBuilder(
@@ -129,11 +139,7 @@ class _LacakPesananPageState extends State<LacakPesananPage>
                       child: ListView(
                         padding: EdgeInsets.zero,
                         children: [
-                          _Header(
-                            pesanan: p,
-                            tahap: tahap,
-                            denyut: _denyut,
-                          ),
+                          _Header(pesanan: p, tahap: tahap, denyut: _denyut),
                           _kartuPengiriman(p, tahap),
                           _kartuPerjalanan(p, model, tahap),
                           _kartuAlamat(p),
@@ -362,8 +368,10 @@ class _LacakPesananPageState extends State<LacakPesananPage>
     );
   }
 
-  // ----- Tombol kembali ke beranda -----
+  // ----- Tombol bawah: ke riwayat + ke beranda -----
   Widget _barBawah() {
+    const gayaTeks = TextStyle(fontSize: 15, fontWeight: FontWeight.bold);
+
     return SafeArea(
       top: false,
       child: Container(
@@ -378,18 +386,34 @@ class _LacakPesananPageState extends State<LacakPesananPage>
             ),
           ],
         ),
-        child: FilledButton.icon(
-          onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
-          icon: const Icon(Icons.storefront_outlined),
-          label: const Text('Kembali ke Beranda'),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-            shape: const StadiumBorder(),
-            textStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.maybePop(context),
+                icon: const Icon(Icons.receipt_long_outlined),
+                label: const Text('Riwayat'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  shape: const StadiumBorder(),
+                  textStyle: gayaTeks,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
+                icon: const Icon(Icons.storefront_outlined),
+                label: const Text('Beranda'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  shape: const StadiumBorder(),
+                  textStyle: gayaTeks,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -447,23 +471,19 @@ class _Header extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(8, 4, 8, 24),
           child: Column(
             children: [
-              // Baris atas: tombol kembali + judul
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+              // Judul (tanpa tombol kembali)
+              const Padding(
+                padding: EdgeInsets.only(top: 12),
+                child: Text(
+                  'Lacak Pesanan',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const Text(
-                    'Lacak Pesanan',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                ),
               ),
+
               const SizedBox(height: 12),
 
               // Ikon status besar
@@ -589,7 +609,9 @@ class _BarProgres extends StatelessWidget {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: selesai ? Colors.white : Colors.white24,
+                                  color: selesai
+                                      ? Colors.white
+                                      : Colors.white24,
                                   boxShadow: aktif
                                       ? [
                                           BoxShadow(
@@ -827,7 +849,10 @@ class _BarisLangkah extends StatelessWidget {
                   if (langkah.waktu != null)
                     Text(
                       _tgl(langkah.waktu!),
-                      style: const TextStyle(fontSize: 12, color: Colors.black45),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black45,
+                      ),
                     ),
                 ],
               ),

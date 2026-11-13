@@ -6,6 +6,7 @@ import '../data/dummy_data.dart';
 import '../models/product.dart';
 import 'detail_page.dart';
 import 'keranjang_page.dart';
+import 'riwayat_pesanan_page.dart';
 
 /// ID produk yang masuk bagian "Terlaris" (bisa digeser ke samping).
 /// Ubah angka di sini kalau ingin mengganti produk terlaris.
@@ -132,7 +133,35 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 16),
+
+            // Tombol riwayat pesanan (badge = jumlah pesanan)
+            ListenableBuilder(
+              listenable: PesananModel.instance,
+              builder: (context, _) {
+                final jumlah = PesananModel.instance.daftar.length;
+                return OutlinedButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PesananSayaPage()),
+                  ),
+                  icon: Badge(
+                    isLabelVisible: jumlah > 0,
+                    label: Text('$jumlah'),
+                    child: const Icon(Icons.receipt_long_outlined),
+                  ),
+                  label: const Text('Riwayat Pesanan'),
+                  style: OutlinedButton.styleFrom(
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
 
             // Kolom pencarian
             Padding(
